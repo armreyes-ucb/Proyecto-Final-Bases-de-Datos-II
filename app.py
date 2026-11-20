@@ -1,9 +1,11 @@
 from flask import Flask
 
+from models.product import Product
 from routes import products_bp
 
 
 app = Flask(__name__)
+app.jinja_env.globals["get_image"] = Product.get_image
 app.register_blueprint(products_bp)
 
 
