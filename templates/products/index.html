@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center mt-5 mb-5">APP API-REST PYTHON - FLASK - MONGODB</h1>
+
+    <div class="row row-cols-1 row-cols-md-2">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-center">Alta producto</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('products.add_product') }}" method="POST">
+                        <label for="name">Nombre</label>
+                        <input id="name" type="text" class="form-control mb-3" name="name">
+                        <label for="price">Precio</label>
+                        <input id="price" type="text" class="form-control mb-3" name="price">
+                        <label for="quantity">Cantidad</label>
+                        <input id="quantity" type="text" class="form-control mb-3" name="quantity">
+                        <button class="btn btn-primary" type="submit">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="text-center">Productos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-1 row-cols-md-2">
+                        {% for product in products %}
+                        <div class="col">
+                            <div class="list-group-item mb-3">
+                                <form action="{{ url_for('products.edit', product_name=product.name) }}" method="POST">
+                                    <input type="text" class="form-control" value="{{ product.name }}" name="name">
+                                    <small>CANTIDAD</small>
+                                    <input type="text" class="form-control" value="{{ product.quantity }}" name="quantity">
+                                    <small>PRECIO</small>
+                                    <input type="text" class="form-control" value="{{ product.price }}" name="price">
+                                    <button class="btn btn-primary btn-sm mt-3" type="submit">Editar</button>
+                                    <a href="{{ url_for('products.delete', product_name=product.name) }}" class="btn btn-danger btn-sm mt-3">Eliminar</a>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

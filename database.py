@@ -1,13 +1,9 @@
 from pymongo import MongoClient
-import certifi
 
-MONGO_URI = 'mongodb+srv://user:password@cluster0.f5vxk.mongodb.net/?retryWrites=true&w=majority'
-ca = certifi.where()
+from config import MONGO_DATABASE, MONGO_URI
+
 
 def dbConnection():
-    try:
-        client = MongoClient(MONGO_URI, tlsCAFile=ca)
-        db = client["dbb_products_app"]
-    except ConnectionError:
-        print('Error de conexión con la bdd')
-    return db
+    """Return the configured MongoDB database handle."""
+    client = MongoClient(MONGO_URI)
+    return client[MONGO_DATABASE]
