@@ -1,3 +1,6 @@
+DEFAULT_IMAGE = "/static/uploads/default.png"
+
+
 class Product:
     def __init__(
         self,
@@ -36,5 +39,15 @@ class Product:
             document.get("imagen", ""),
         )
 
-    def get_image(self):
-        return self.imagen or "/static/uploads/default.png"
+    @staticmethod
+    def get_image(document):
+        """Return the product image or the default one when missing/empty."""
+        if isinstance(document, dict):
+            imagen = document.get("imagen")
+        else:
+            imagen = getattr(document, "imagen", None)
+
+        if not isinstance(imagen, str):
+            return DEFAULT_IMAGE
+
+        return imagen.strip() or DEFAULT_IMAGE

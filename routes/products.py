@@ -1,4 +1,8 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+import re
+
+from bson import ObjectId
+from bson.errors import InvalidId
+from flask import Blueprint, abort, redirect, render_template, request, url_for
 
 from database import dbConnection
 from models.product import Product
@@ -13,6 +17,66 @@ products = db["products"]
 def home():
     products_received = products.find()
     return render_template("products/index.html", products=products_received)
+
+
+@products_bp.route("/products")
+def list_products():
+    """List products sorted by name, with optional combined filters."""
+    q = request.args.get("q", "").strip()
+    category = request.args.get("category", "").strip()
+    min_price = request.args.get("min_price", "").strip()
+    max_price = request.args.get("max_price", "").strip()
+
+    query = {}
+    if q:
+        query["nombre"] = {"$regex": re.escape(q), "$options": "i"}
+    if category:
+        query["categoria"] = category
+
+    price_filter = {}
+    if min_price:
+        try:
+            price_filter["$gte"] = float(min_price)
+        except ValueError:
+            pass
+    if max_price:
+        try:
+            price_filter["$lte"] = float(max_price)
+        except ValueError:
+            pass
+    if price_filter:
+        query["precio"] = price_filter
+
+    products_received = list(products.find(query).sort("nombre", 1))
+    categories = sorted(
+        (value for value in products.distinct("categoria") if value),
+        key=lambda value: str(value).lower(),
+    )
+
+    return render_template(
+        "products/list.html",
+        products=products_received,
+        categories=categories,
+        q=q,
+        category=category,
+        min_price=min_price,
+        max_price=max_price,
+    )
+
+
+@products_bp.route("/products/<string:product_id>")
+def product_detail(product_id):
+    """Show a single product on its own page."""
+    try:
+        object_id = ObjectId(product_id)
+    except (InvalidId, TypeError):
+        abort(404)
+
+    product = products.find_one({"_id": object_id})
+    if product is None:
+        abort(404)
+
+    return render_template("products/detail.html", product=product)
 
 
 @products_bp.route("/products", methods=["POST"])
